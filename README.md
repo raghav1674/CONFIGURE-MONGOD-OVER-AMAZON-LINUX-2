@@ -1,5 +1,4 @@
 # CONFIGURE MONGOD OVER AMAZON LINUX 2
-# MAP REDUCE CLUSTER CONFIGURED USING ANSIBLE:
 
 ## Create vars folder, inside that create two files secret.yaml and instance_vars.yaml: 
 
