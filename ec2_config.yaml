@@ -1,0 +1,60 @@
+- hosts: localhost
+  vars_files:
+  - vars/secret.yaml
+  - vars/instance_vars.yaml
+
+  tasks:
+  - name: ensuring that boto library is installed
+    pip:
+      name: boto
+
+
+  - name: launching ec2 instance
+    ec2:
+      key_name: "{{ key }}"
+      instance_type: "{{ type_instance }}"
+      image: "{{ ami_id }}"
+      group_id: ["{{ security_group_id  }}"]
+      count: "{{ item.count }}"
+      instance_tags:
+        Name: "{{ item.tag_name }}"
+      vpc_subnet_id: "{{ subnet_id }}"
+      assign_public_ip: "{{ has_public_ip }}"
+      aws_access_key: "{{ AWS_ACCESS_KEY_VAL }}"
+      aws_secret_key: "{{ AWS_SECRET_KEY_VAL }}"
+      region: "{{ region_id }}"
+    loop:
+    - { count: 1,tag_name: 'MONGO' }
+ 
+ 
+  - name: appending aws_access_key in ec2.ini file
+    lineinfile:
+      dest: "{{ inventory_path }}/ec2.ini"
+      line: "aws_access_key_id = {{ AWS_ACCESS_KEY_VAL }}"
+      insertafter: 'EOF'
+      state: present
+     
+  - name: commenting the ec2 import line 
+    lineinfile:
+      dest: "{{ inventory_path }}/ec2.py"
+      regexp: "from ansible.module_utils import ec2 as ec2_utils"
+      line: "#from ansible.module_utils import ec2 as ec2_utils"  
+
+  - name: appending aws_secret_key in ec2.ini file
+    lineinfile:
+      dest: "{{ inventory_path }}/ec2.ini"
+      line: "aws_secret_access_key = {{ AWS_SECRET_KEY_VAL }}"
+      insertafter: 'EOF'
+      state: present
+  
+
+  - name: changing the interpreter from python2 to python3
+    lineinfile:
+      path: "{{ inventory_path }}/ec2.py"
+      regexp: '#!/usr/bin/env python'
+      line: '#!/usr/bin/python3'
+ 
+
+  - name: running ec2.py file
+    command: "./{{ inventory_path }}/ec2.py  --list"   
+  
