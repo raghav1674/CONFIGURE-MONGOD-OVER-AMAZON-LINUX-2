@@ -30,6 +30,9 @@
 	has_public_ip: true
 
 
+- Provide the path to private key (.pem) in the ansible.cfg file 
+
+
 ## HOW TO RUN THIS ANSIBLE PLAYBOOKS:
 
  - Run the ec2_config.yaml file first. 
